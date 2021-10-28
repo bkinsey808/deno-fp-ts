@@ -1,0 +1,33 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "sourceType": "module"
+  },
+  "extends": [
+    "prettier",
+    "plugin:import/typescript",
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:fp-ts-strict/recommended"
+  ],
+  "plugins": ["prettier", "import", "fp-ts-strict", "@typescript-eslint"],
+  "rules": {
+    "arrow-body-style": ["error", "as-needed"],
+    "eqeqeq": ["error", "always"],
+    "import/order": [
+      "error",
+      { "newlines-between": "always-and-inside-groups" }
+    ],
+    "no-unexpected-multiline": "error",
+    "prefer-const": "error",
+    "prettier/prettier": "error",
+    "fp-ts-strict/record-lookup": "off",
+    "@typescript-eslint/no-inferrable-types": "error"
+  },
+  "env": {
+    "browser": false
+  },
+  "settings": {
+    "import/extensions": [".ts", ".tsx"]
+  }
+}

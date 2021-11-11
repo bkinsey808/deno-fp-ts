@@ -24,5 +24,6 @@
     "https://esm.sh": false,
     "https://cdn.skypack.dev": false,
     "https://deno.land": false
-  }
+  },
+  "editor.tabSize": 2
 }

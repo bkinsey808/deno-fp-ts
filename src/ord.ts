@@ -5,7 +5,11 @@ import {
   fromCompare,
 } from 'https://esm.sh/fp-ts/Ord';
 import { Ord as ordNumber } from 'https://esm.sh/fp-ts/number';
-import { sort, sortBy, getOrd } from 'https://esm.sh/fp-ts/Array';
+import {
+  sort,
+  sortBy,
+  getOrd as arrayGetOrd,
+} from 'https://esm.sh/fp-ts/Array';
 
 import {
   assertStrictEquals,
@@ -89,9 +93,9 @@ const sortObjByKey = <ObjType>(key: keyof ObjType) => sort(ordObjByKey(key));
 assertEquals(sortObjByA([o1, o2, o3]), [o2, o1, o3]);
 assertEquals(sortObjByKey('a')([o1, o2, o3]), [o2, o1, o3]);
 
-const ordArrayObjByA = getOrd(ordObjByA);
+const ordArrayObjByA = arrayGetOrd(ordObjByA);
 const ordArrayObjByKey = <ObjType>(key: keyof ObjType) =>
-  getOrd(ordObjByKey(key));
+  arrayGetOrd(ordObjByKey(key));
 assertStrictEquals(ordArrayObjByA.compare([{ a: 20 }], [{ a: 30 }]), -1);
 assertStrictEquals(ordArrayObjByKey('a').compare([{ a: 20 }], [{ a: 30 }]), -1);
 

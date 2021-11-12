@@ -7,19 +7,28 @@ import {
   reverse as semigroupReverse,
   max as semigroupMax,
   min as semigroupMin,
+  getMeetSemigroup,
+  getJoinSemigroup,
   first,
   last,
+  fold as semigroupFold,
 } from 'https://esm.sh/fp-ts/Semigroup';
-import { SemigroupAll, SemigroupAny } from 'https://esm.sh/fp-ts/boolean';
 import {
-  SemigroupSum,
+  SemigroupAll as semigroupAll,
+  SemigroupAny as semigroupAny,
+} from 'https://esm.sh/fp-ts/boolean';
+import {
+  SemigroupSum as semigroupSum,
+  SemigroupProduct as semigroupProduct,
   Ord as numberOrd,
-  SemigroupProduct,
+  MonoidSum as monoidSum,
+  MonoidProduct as monoidProduct,
 } from 'https://esm.sh/fp-ts/number';
 import { Semigroup as stringSemigroup } from 'https://esm.sh/fp-ts/string';
 import { pipe, getSemigroup } from 'https://esm.sh/fp-ts/function';
 import { contramap as ordContramap, ordNumber } from 'https://esm.sh/fp-ts/Ord';
 import { getMonoid as arrayGetMonoid } from 'https://esm.sh/fp-ts/Array';
+import { concatAll as monoidConcatAll } from 'https://esm.sh/fp-ts/Monoid';
 
 import {
   assertStrictEquals,
@@ -27,23 +36,47 @@ import {
 } from 'https://deno.land/std@0.111.0/testing/asserts.ts';
 import { getApplySemigroup, some, none } from 'https://esm.sh/fp-ts/Option';
 
-export const semigroupSum: Semigroup<number> = {
-  concat: (x, y) => x + y,
-};
-
 export const semigroupString: Semigroup<string> = {
   concat: (x, y) => x + y,
 };
 
-// compare with const sum = monoidConcatAll(MonoidSum);
+export const semigroupSumDerived: Semigroup<number> = {
+  concat: (x, y) => x + y,
+};
+
+export const semigroupProductDerived: Semigroup<number> = {
+  concat: (x, y) => x * y,
+};
+
 const sum = semigroupConcatAll(semigroupSum)(0);
 assertStrictEquals(sum([1, 2, 3, 4]), 10);
 
-assertStrictEquals(SemigroupAll.concat(true, true), true);
-assertStrictEquals(SemigroupAll.concat(true, false), false);
+const sumAlternative1 = semigroupConcatAll(semigroupSumDerived)(0);
+assertStrictEquals(sumAlternative1([1, 2, 3, 4]), 10);
 
-const semigroupAllTrue = semigroupConcatAll(SemigroupAll)(true);
-const semigroupAnyTrue = semigroupConcatAll(SemigroupAny)(true);
+const sumAlternative2 = semigroupFold(semigroupSum)(0);
+assertStrictEquals(sumAlternative2([1, 2, 3, 4]), 10);
+
+const sumAlternative3 = monoidConcatAll(monoidSum);
+assertStrictEquals(sumAlternative3([1, 2, 3, 4]), 10);
+
+const product = semigroupConcatAll(semigroupProduct)(1);
+assertStrictEquals(product([1, 2, 3, 4]), 24);
+
+const productAlternative1 = semigroupConcatAll(semigroupProductDerived)(1);
+assertStrictEquals(productAlternative1([1, 2, 3, 4]), 24);
+
+const productAlternative2 = semigroupFold(semigroupProduct)(1);
+assertStrictEquals(productAlternative2([1, 2, 3, 4]), 24);
+
+const productAlternative3 = monoidConcatAll(monoidProduct);
+assertStrictEquals(productAlternative3([1, 2, 3, 4]), 24);
+
+assertStrictEquals(semigroupAll.concat(true, true), true);
+assertStrictEquals(semigroupAll.concat(true, false), false);
+
+const semigroupAllTrue = semigroupConcatAll(semigroupAll)(true);
+const semigroupAnyTrue = semigroupConcatAll(semigroupAny)(true);
 
 assertStrictEquals(semigroupAllTrue([true, false]), false);
 assertStrictEquals(semigroupAnyTrue([true, false]), true);
@@ -80,8 +113,8 @@ interface Point {
 }
 
 const semigroupPointSum = semigroupStruct<Point>({
-  x: SemigroupSum,
-  y: SemigroupSum,
+  x: semigroupSum,
+  y: semigroupSum,
 });
 
 const p1: Point = { x: 1, y: 2 };
@@ -91,13 +124,13 @@ assertEquals(semigroupPointSum.concat(p1, p2), {
   y: 6,
 });
 
-const semigroupTupleConcatSum = semigroupTuple(stringSemigroup, SemigroupSum);
+const semigroupTupleConcatSum = semigroupTuple(stringSemigroup, semigroupSum);
 assertEquals(semigroupTupleConcatSum.concat(['a', 1], ['b', 2]), ['ab', 3]);
 
 const semigroupTupleConcatSumAll = semigroupTuple(
   stringSemigroup,
-  SemigroupSum,
-  SemigroupAll,
+  semigroupSum,
+  semigroupAll,
 );
 assertEquals(
   semigroupTupleConcatSumAll.concat(['a', 1, true], ['b', 2, false]),
@@ -114,7 +147,7 @@ assertStrictEquals(first<number>().concat(1, 2), 1);
 assertStrictEquals(last<number>().concat(1, 2), 2);
 
 const semigroupPointPredicate: Semigroup<(p: Point) => boolean> =
-  getSemigroup(SemigroupAll)<Point>();
+  getSemigroup(semigroupAll)<Point>();
 
 const isPositiveX = (p: Point): boolean => p.x >= 0;
 const isPositiveY = (p: Point): boolean => p.y >= 0;
@@ -125,10 +158,7 @@ assertStrictEquals(isPositiveXY({ x: 1, y: -1 }), false);
 assertStrictEquals(isPositiveXY({ x: -1, y: 1 }), false);
 assertStrictEquals(isPositiveXY({ x: -1, y: -1 }), false);
 
-const product = semigroupConcatAll(SemigroupProduct)(1);
-assertStrictEquals(product([1, 2, 3, 4]), 24);
-
-const semigroupOptionNumber = getApplySemigroup(semigroupSum);
+const semigroupOptionNumber = getApplySemigroup(semigroupSumDerived);
 
 assertStrictEquals(semigroupOptionNumber.concat(some(1), none), none);
 assertEquals(semigroupOptionNumber.concat(some(1), some(2)), some(3));
@@ -152,7 +182,7 @@ const semigroupCustomer: Semigroup<Customer> = semigroupStruct({
   // keep the most recent date
   lastUpdatedAt: semigroupMax(ordNumber),
   // Boolean semigroup under disjunction
-  hasMadePurchase: SemigroupAny,
+  hasMadePurchase: semigroupAny,
 });
 
 const c1 = {
@@ -187,3 +217,14 @@ const semigroupSpace: Semigroup<string> = {
   concat: (x, y) => x + ' ' + y,
 };
 assertStrictEquals(semigroupSpace.concat('a', 'b'), 'a b');
+
+/** Takes the minimum of two values */
+const derivedSemigroupMin: Semigroup<number> = getMeetSemigroup(ordNumber);
+
+/** Takes the maximum of two values  */
+const derivedSemigroupMax: Semigroup<number> = getJoinSemigroup(ordNumber);
+
+assertStrictEquals(derivedSemigroupMin.concat(2, 1), 1);
+assertStrictEquals(derivedSemigroupMax.concat(2, 1), 2);
+
+

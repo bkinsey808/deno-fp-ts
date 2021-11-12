@@ -3,6 +3,7 @@ import {
   contramap as ordContramap,
   ordString,
   fromCompare,
+  reverse as ordReverse,
 } from 'https://esm.sh/fp-ts/Ord';
 import { Ord as ordNumber } from 'https://esm.sh/fp-ts/number';
 import {
@@ -111,3 +112,33 @@ assertEquals(sortByZIndex([{ zIndex: 113 }, { zIndex: 10 }, { zIndex: 11 }]), [
   { zIndex: 11 },
   { zIndex: 113 },
 ]);
+
+// from https://dev.to/gcanti/getting-started-with-fp-ts-ord-5f1e
+
+const min =
+  <A>(O: Ord<A>): ((x: A, y: A) => A) =>
+  (x, y) =>
+    O.compare(x, y) === 1 ? y : x;
+assertStrictEquals(min(ordNumber)(2, 1), 1);
+
+type User = {
+  name: string;
+  age: number;
+};
+
+const byAge: Ord<User> = ordContramap((user: User) => user.age)(ordNumber);
+
+const getYounger = min(byAge);
+
+assertEquals(
+  getYounger({ name: 'Guido', age: 48 }, { name: 'Giulio', age: 45 }),
+  { name: 'Giulio', age: 45 },
+);
+
+const max = <A>(ord: Ord<A>): ((x: A, y: A) => A) => min(ordReverse(ord));
+
+const getOlder = max(byAge);
+assertEquals(
+  getOlder({ name: 'Guido', age: 48 }, { name: 'Giulio', age: 45 }),
+  { name: 'Guido', age: 48 },
+);

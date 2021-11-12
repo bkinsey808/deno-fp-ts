@@ -32,8 +32,8 @@ import {
   Ord as numberOrd,
 } from 'https://esm.sh/fp-ts/number';
 import { first, last } from 'https://esm.sh/fp-ts/Semigroup';
-import { pipe, flow } from 'https://esm.sh/fp-ts/function';
 import { right, left } from 'https://esm.sh/fp-ts/Either';
+import { pipe } from 'https://esm.sh/fp-ts/function';
 import {
   assertStrictEquals,
   assertEquals,

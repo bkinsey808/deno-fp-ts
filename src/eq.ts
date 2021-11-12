@@ -23,9 +23,10 @@ import { assertStrictEquals } from 'https://deno.land/std@0.111.0/testing/assert
 assertStrictEquals(eqNumber.equals(10, 10), true);
 assertStrictEquals(eqString.equals('abc', 'def'), false);
 
-function elem<A>(eq: Eq<A>): (a: A, as: Array<A>) => boolean {
-  return (a, as) => as.some((item) => eq.equals(item, a));
-}
+const elem =
+  <A>(eq: Eq<A>): ((a: A, as: Array<A>) => boolean) =>
+  (a, as) =>
+    as.some((item) => eq.equals(item, a));
 
 const elem2 =
   <A>(eq: Eq<A>) =>

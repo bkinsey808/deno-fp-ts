@@ -2,6 +2,7 @@ import { pipe, flow } from 'https://esm.sh/fp-ts/function';
 
 import { assertStrictEquals } from 'https://deno.land/std@0.111.0/testing/asserts.ts';
 
+// see https://rlee.dev/practical-guide-to-fp-ts-part-1
 const add1 = (num: number): number => num + 1;
 
 const multiply2 = (num: number): number => num * 2;

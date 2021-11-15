@@ -25,6 +25,8 @@ import {
   match as optionMatch,
   alt as optionAlt,
   getEq as optionGetEq,
+  flatten as optionFlatten,
+  chain,
 } from 'https://esm.sh/fp-ts/Option';
 import {
   Eq as numberEq,
@@ -33,12 +35,13 @@ import {
 } from 'https://esm.sh/fp-ts/number';
 import { first, last } from 'https://esm.sh/fp-ts/Semigroup';
 import { right, left } from 'https://esm.sh/fp-ts/Either';
-import { pipe } from 'https://esm.sh/fp-ts/function';
+import { pipe, flow } from 'https://esm.sh/fp-ts/function';
 import {
   assertStrictEquals,
   assertEquals,
 } from 'https://deno.land/std@0.111.0/testing/asserts.ts';
 
+// see https://rlee.dev/practical-guide-to-fp-ts-part-2
 interface Foo {
   bar: string;
 }

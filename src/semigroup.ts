@@ -226,5 +226,3 @@ const derivedSemigroupMax: Semigroup<number> = getJoinSemigroup(ordNumber);
 
 assertStrictEquals(derivedSemigroupMin.concat(2, 1), 1);
 assertStrictEquals(derivedSemigroupMax.concat(2, 1), 2);
-
-

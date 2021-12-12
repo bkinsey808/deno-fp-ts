@@ -36,6 +36,10 @@ import {
 } from 'https://deno.land/std@0.111.0/testing/asserts.ts';
 import { getApplySemigroup, some, none } from 'https://esm.sh/fp-ts/Option';
 
+// semigroup has an associative binary operation called concat.
+// associative means the order you run concat on x, y, and z does not matter.
+// concat(x, concat(y, z)) = concat(concat(x, y), z)
+
 export const semigroupString: Semigroup<string> = {
   concat: (x, y) => x + y,
 };

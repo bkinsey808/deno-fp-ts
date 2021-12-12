@@ -2,11 +2,11 @@
   "$schema": "https://deno.land/x/denon@2.4.9/schema.json",
   "scripts": {
     "start": {
-      "cmd": "deno run src/index.ts",
+      "cmd": "deno run --alow-net src/index.ts",
       "desc": "run my helloWorld.ts file"
     },
     "watch": {
-      "cmd": "denon run src/index.ts",
+      "cmd": "denon run --allow-net src/index.ts",
       "desc": "run my helloWorld.ts file"
     }
   }

@@ -6,3 +6,4 @@ import './semigroup.ts';
 import './option.ts';
 import './either.ts';
 import './task.ts';
+import './taskEither.ts';

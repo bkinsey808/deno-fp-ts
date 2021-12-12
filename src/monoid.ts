@@ -31,6 +31,8 @@ import {
   assertEquals,
 } from 'https://deno.land/std@0.111.0/testing/asserts.ts';
 
+/** monoid is a Semigroup with an empty */
+
 const lessThanOrEqualToFour: Predicate<number> = (n) => n <= 4;
 const greaterThanOrEqualToZero: Predicate<number> = (n) => n >= 0;
 const isOdd: Predicate<number> = (n) => n % 2 === 1;

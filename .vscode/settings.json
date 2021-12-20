@@ -15,7 +15,8 @@
     "Giulio",
     "Monoid",
     "semigroup",
-    "setoid"
+    "setoid",
+    "typesafe"
   ],
   "deno.path": "/home/bkinsey/.deno/bin/deno",
   "deno.enable": true,

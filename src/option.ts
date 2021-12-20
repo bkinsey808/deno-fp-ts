@@ -26,7 +26,10 @@ import {
   alt as optionAlt,
   getEq as optionGetEq,
   flatten as optionFlatten,
-  chain,
+  chain as optionChain,
+  fold as optionFold,
+  filter as optionFilter,
+  getRefinement,
 } from 'https://esm.sh/fp-ts/Option';
 import {
   Eq as numberEq,
@@ -35,7 +38,8 @@ import {
 } from 'https://esm.sh/fp-ts/number';
 import { first, last } from 'https://esm.sh/fp-ts/Semigroup';
 import { right, left } from 'https://esm.sh/fp-ts/Either';
-import { pipe, flow } from 'https://esm.sh/fp-ts/function';
+import { head, filterMap } from 'https://esm.sh/fp-ts/Array';
+import { pipe } from 'https://esm.sh/fp-ts/function';
 import {
   assertStrictEquals,
   assertEquals,
@@ -78,10 +82,10 @@ const b: Option<string> = { _tag: 'Some', value: 'b' };
 assertEquals(optionApFirst(a)(b), b);
 assertEquals(optionApSecond(a)(b), a);
 
-const getOption = optionFromPredicate((n: number) => n >= 0);
+const optionIsPositive = optionFromPredicate((n: number) => n >= 0);
 
-assertEquals(getOption(-1), none);
-assertEquals(getOption(1), some(1));
+assertEquals(optionIsPositive(-1), none);
+assertEquals(optionIsPositive(1), some(1));
 
 assertEquals(getLeft(right(1)), none);
 assertEquals(getLeft(left('a')), some('a'));
@@ -278,3 +282,97 @@ assertStrictEquals(
   ),
   false,
 );
+
+// see https://dev.to/anthonyjoeseph/should-i-use-fp-ts-option-28ed
+const optionMultiplyByTwo: (num: Option<number>) => Option<number> = optionMap(
+  (n) => n * 2,
+);
+
+assertEquals(optionMultiplyByTwo(some(1)), some(2));
+assertStrictEquals(optionMultiplyByTwo(none), none);
+assertStrictEquals(optionMultiplyByTwo(optionFromNullable(undefined)), none);
+
+assertStrictEquals(pipe(optionChain(optionIsPositive))(some(-1)), none);
+
+assertEquals(pipe(optionChain(optionIsPositive))(some(2)), some(2));
+
+assertEquals(optionFlatten(some(some(1))), some(1));
+
+// see https://zanza00.gitbook.io/learn-fp-ts/option
+const safeFirstElement = <T>(arr: T[]) => head<T>(arr);
+
+const optionIsNumber = (o: Option<unknown>) =>
+  optionFold(
+    () => none,
+    (n) => (typeof n === 'number' ? some(n) : none),
+  )(o);
+
+const _optionIsNumber2 = (o: Option<unknown>) =>
+  optionChain((n) => (typeof n === 'number' ? some(n) : none))(o);
+
+assertEquals(pipe(safeFirstElement([1, 2, 3]), optionIsNumber), some(1));
+assertEquals(
+  pipe(
+    safeFirstElement([1, 2, 3]),
+    optionChain((n) => (typeof n === 'number' ? some(n) : none)),
+    optionMap((n) => n * 2),
+  ),
+  some(2),
+);
+assertEquals(
+  pipe(
+    safeFirstElement([1, 2, 3]),
+    optionFilter((n) => typeof n === 'number'),
+    optionMap((n) => n * 2),
+  ),
+  some(2),
+);
+assertEquals(
+  pipe(
+    safeFirstElement(['a', 2, 3]),
+    optionChain((n) => (typeof n === 'number' ? some(n) : none)),
+    optionMap((n) => n * 2),
+  ),
+  none,
+);
+
+assertEquals(
+  pipe(
+    safeFirstElement(['a', 2, 3]),
+    optionFilter((n) => typeof n === 'number'),
+    optionMap((n) => n as number),
+    optionMap((n) => n * 2),
+  ),
+  none,
+);
+
+type Box = BlueBox | RedBox;
+
+type BlueBox = {
+  t: 'Blue';
+  value: string;
+};
+type RedBox = {
+  t: 'Red';
+  v: number;
+};
+
+// see https://zanza00.gitbook.io/learn-fp-ts/option/type-guards
+// these are typesafe
+const parseBlueBox = (box: Box): Option<BlueBox> =>
+  box.t === 'Blue' ? some(box) : none;
+const parseRedBox = (box: Box): Option<RedBox> =>
+  box.t === 'Red' ? some(box) : none;
+
+const isBlueBox = getRefinement(parseBlueBox);
+const isRedBox = getRefinement(parseRedBox);
+
+const boxes: Array<Box> = [
+  { t: 'Blue', value: 'blue' },
+  { t: 'Red', v: 1 },
+];
+
+const onlyBlueBoxes = filterMap(parseBlueBox)(boxes);
+assertEquals(onlyBlueBoxes, [{ t: 'Blue', value: 'blue' }]);
+assertEquals(isBlueBox({ t: 'Blue', value: 'blue' }), true);
+assertEquals(isRedBox({ t: 'Blue', value: 'blue' }), false);
